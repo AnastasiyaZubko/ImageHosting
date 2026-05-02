@@ -14,7 +14,7 @@ class BaseHandler(BaseHTTPRequestHandler):
 
     def response (self,data: str | bytes,content_type: str='text/html', status_code=200):
         self.send_response(status_code)
-        self.send_header('Content-type', 'content_type')
+        self.send_header('Content-type', content_type)
         self.end_headers()
         self.wfile.write(data if isinstance(data, bytes) else data.encode('utf-8'))
 
