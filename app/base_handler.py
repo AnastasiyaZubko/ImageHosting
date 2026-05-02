@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from http.server import BaseHTTPRequestHandler
-import pathlib
+
 from app.settings import  STATIC_DIR
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ class BaseHandler(BaseHTTPRequestHandler):
         except FileNotFoundError:
             return b'Not Found'
 
-    def template_response(self, template_filename: str)->None:
+    def template_response(self, template_filename: str) -> None:
         self.html_response(self.load_static(template_filename))
 
     def send_file(self,filename:str)->None:

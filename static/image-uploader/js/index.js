@@ -13,6 +13,3 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-
-
-
