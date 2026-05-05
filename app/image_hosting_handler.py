@@ -1,4 +1,5 @@
 from base_handler import BaseHandler
+import multipart
 
 
 class ImageHostingHandler(BaseHandler):
@@ -16,6 +17,11 @@ class ImageHostingHandler(BaseHandler):
         else:
             self.html_response('Not Found', 400)
 
+    def do_POST(self):
+        if self.path == '/api/upload':
+            self.upload_file()
+        else:
+            self.html_response('Not Found', 400)
 
 
 

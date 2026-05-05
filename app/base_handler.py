@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import logging
 from http.server import BaseHTTPRequestHandler
-
-from app.settings import  STATIC_DIR
+import multipart
+from app.settings import STATIC_DIR, MEDIA_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -42,3 +42,27 @@ class BaseHandler(BaseHTTPRequestHandler):
         else:
             content_type='application/octet-stream'
         self.response(self.load_static(filename), content_type)
+
+
+    def parse_multipart(self, content_type: str, options:dict, content_length:int, filename:str = None)-> None:
+
+        if content_type == 'multipart/form-data' and 'boundary' in options:
+            parser = multipart.MultipartParser(self.rfile,
+                                               boundary=options['boundary'],
+                                               content_length=content_length)
+
+            for part in parser:
+                if part.filename:
+                    logger.info(f'{part.name}: File upload ({part.size} bytes)')
+                    part.save_as(f'../{MEDIA_DIR}/{filename or part.filename}')
+
+            for part in parser.parts():
+                part.close()
+        self.response('Got your file', 'text/plain')
+
+    def upload_file(self, filename:str=None) -> None:
+        content_type, options = multipart.parse_options_header(
+            self.headers['Content-Type'])
+        content_length = int(self.headers['Content-Length'])
+        self.parse_multipart(content_type, options, content_length, filename)
+
