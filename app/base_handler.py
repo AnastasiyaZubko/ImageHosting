@@ -3,9 +3,11 @@ from __future__ import annotations
 import json
 import logging
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
+
 from multipart import MultipartPart, MultipartParser, parse_options_header
 
-from app.settings import STATIC_DIR,IMAGE_EXTENSIONS, MAX_FILE_SIZE, MEDIA_PATH
+from app.settings import STATIC_DIR, IMAGE_EXTENSIONS, MAX_FILE_SIZE, MEDIA_PATH, STATIC_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -31,17 +33,20 @@ class BaseHandler(BaseHTTPRequestHandler):
         self.response(data, 'application/json', status_code)
 
     @staticmethod
-    def load_static(filename:str)->bytes:
+    def load_file(filename:str, directory: Path = STATIC_PATH)->bytes:
         try:
-            with open(f'../{STATIC_DIR}/{filename}', 'rb') as file:
+            path = (directory/filename.lstrip('/')).resolve()
+            path.relative_to(directory.resolve())
+
+            with open(path, 'rb') as file:
                 return file.read()
         except FileNotFoundError:
             return b'Not Found'
 
     def template_response(self, template_filename: str) -> None:
-        self.html_response(self.load_static(template_filename))
+        self.html_response(self.load_file(template_filename))
 
-    def send_file(self,filename:str)->None:
+    def send_static_file(self,filename:str)->None:
         if filename.endswith('.png'):
             content_type='image/png'
         elif filename.endswith('.css'):
@@ -50,7 +55,11 @@ class BaseHandler(BaseHTTPRequestHandler):
             content_type='text/javascript'
         else:
             content_type='application/octet-stream'
-        self.response(self.load_static(filename), content_type)
+        self.response(self.load_file(filename), content_type)
+
+    def send_media_file(self,filename:str)->None:
+        self.response(self.load_file(filename, MEDIA_PATH), content_type='image/png')
+
 
     def validate_file(self, file: MultipartPart) -> bool:
         name, ext = file.filename.split('.')
