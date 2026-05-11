@@ -52,7 +52,7 @@ class ImageHostingHandler(BaseHandler):
     def get_images(self):
         self.json_response({
             'images': [f.name for f in MEDIA_PATH.iterdir()
-                       if f.name !='.gitkeep']
+                       if f.name != '.gitkeep']
         })
 
     def delete_image(self, name: str):
@@ -63,8 +63,3 @@ class ImageHostingHandler(BaseHandler):
         except FileNotFoundError:
             logger.info(f'Image {name} not found (on delete)')
             self.json_response({'message': 'Image not found'}, 404)
-
-
-
-
-

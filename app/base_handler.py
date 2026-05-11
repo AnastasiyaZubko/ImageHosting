@@ -16,7 +16,7 @@ class BaseHandler(BaseHTTPRequestHandler):
     server_version = '0.1'
     server_name = 'Image Hosting Server'
 
-    def response (self,data: str | bytes,content_type: str='text/html', status_code=200)-> None:
+    def response(self, data: str | bytes, content_type: str = 'text/html', status_code=200) -> None:
         self.send_response(status_code)
         self.send_header('Content-type', content_type)
         self.end_headers()
@@ -24,18 +24,18 @@ class BaseHandler(BaseHTTPRequestHandler):
             data if isinstance(data, bytes) else data.encode('utf-8')
         )
 
-    def html_response(self, data:str | bytes, status_code=200)->None:
+    def html_response(self, data: str | bytes, status_code=200) -> None:
         self.response(data, 'text/html', status_code)
 
-    def json_response(self, data:dict | list | str | bytes, status_code=200)->None:
-        if isinstance(data, (dict,list)):
+    def json_response(self, data: dict | list | str | bytes, status_code=200) -> None:
+        if isinstance(data, (dict, list)):
             data = json.dumps(data)
         self.response(data, 'application/json', status_code)
 
     @staticmethod
-    def load_file(filename:str, directory: Path = STATIC_PATH)->bytes:
+    def load_file(filename: str, directory: Path = STATIC_PATH) -> bytes:
         try:
-            path = (directory/filename.lstrip('/')).resolve()
+            path = (directory / filename.lstrip('/')).resolve()
             path.relative_to(directory.resolve())
 
             with open(path, 'rb') as file:
@@ -46,20 +46,19 @@ class BaseHandler(BaseHTTPRequestHandler):
     def template_response(self, template_filename: str) -> None:
         self.html_response(self.load_file(template_filename))
 
-    def send_static_file(self,filename:str)->None:
+    def send_static_file(self, filename: str) -> None:
         if filename.endswith('.png'):
-            content_type='image/png'
+            content_type = 'image/png'
         elif filename.endswith('.css'):
-            content_type='text/css'
+            content_type = 'text/css'
         elif filename.endswith('.js'):
-            content_type='text/javascript'
+            content_type = 'text/javascript'
         else:
-            content_type='application/octet-stream'
+            content_type = 'application/octet-stream'
         self.response(self.load_file(filename), content_type)
 
-    def send_media_file(self,filename:str)->None:
+    def send_media_file(self, filename: str) -> None:
         self.response(self.load_file(filename, MEDIA_PATH), content_type='image/png')
-
 
     def validate_file(self, file: MultipartPart) -> bool:
         name, ext = file.filename.split('.')
@@ -71,16 +70,16 @@ class BaseHandler(BaseHTTPRequestHandler):
             return False
         return True
 
-    def parse_multipart(self, content_type: str, options:dict,
-                        content_length:int, filename:str = None)-> None:
+    def parse_multipart(self, content_type: str, options: dict,
+                        content_length: int, filename: str = None) -> None:
         if content_type == 'multipart/form-data' and 'boundary' in options:
             parser = MultipartParser(self.rfile,
-                                    boundary=options['boundary'],
-                                    content_length=content_length)
+                                     boundary=options['boundary'],
+                                     content_length=content_length)
             for part in parser:
                 if self.validate_file(part):
                     logger.info(f'{part.name}: File upload ({part.size} bytes)')
-                    part.save_as(MEDIA_PATH/(f'{filename}.{part.filename.split('.')[1]}' or part.filename))
+                    part.save_as(MEDIA_PATH / (f'{filename}.{part.filename.split('.')[1]}' or part.filename))
                 else:
                     logger.info(
                         f'{part.name}: Invalid file ({part.size} bytes)')
@@ -89,7 +88,7 @@ class BaseHandler(BaseHTTPRequestHandler):
             for part in parser.parts():
                 part.close()
         else:
-            self.response('Request w/out form',400)
+            self.response('Request w/out form', 400)
             return
         self.response('File upload successfuly', 201)
 
@@ -98,4 +97,3 @@ class BaseHandler(BaseHTTPRequestHandler):
             self.headers['Content-Type'])
         content_length = int(self.headers['Content-Length'])
         self.parse_multipart(content_type, options, content_length, filename)
-
