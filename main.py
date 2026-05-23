@@ -4,7 +4,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import logging
 from dotenv import load_dotenv
 from app.image_hosting_handler import ImageHostingHandler
-import settings
+from app import settings
 from app.settings import LOG_PATH
 
 logging.basicConfig(level=logging.INFO,

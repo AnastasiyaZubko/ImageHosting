@@ -65,6 +65,7 @@ class BaseHandler(BaseHTTPRequestHandler):
         if file.size > MAX_FILE_SIZE:
             self.response('File size too large', status_code=400)
             return False
+        # TODO: validate file with PIL
         return True
 
     def parse_multipart(self, content_type: str, options: dict,
