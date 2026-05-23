@@ -1,12 +1,9 @@
 from __future__ import annotations
-
 import json
 import logging
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
-
 from multipart import MultipartPart, MultipartParser, parse_options_header
-
 from app.settings import STATIC_DIR, IMAGE_EXTENSIONS, MAX_FILE_SIZE, MEDIA_PATH, STATIC_PATH
 
 logger = logging.getLogger(__name__)
@@ -71,7 +68,7 @@ class BaseHandler(BaseHTTPRequestHandler):
         return True
 
     def parse_multipart(self, content_type: str, options: dict,
-                        content_length: int, filename: str = None) -> None:
+                        content_length: int, filename: str = None) -> str | None:
         if content_type == 'multipart/form-data' and 'boundary' in options:
             parser = MultipartParser(self.rfile,
                                      boundary=options['boundary'],
@@ -79,7 +76,11 @@ class BaseHandler(BaseHTTPRequestHandler):
             for part in parser:
                 if self.validate_file(part):
                     logger.info(f'{part.name}: File upload ({part.size} bytes)')
-                    part.save_as(MEDIA_PATH / (f'{filename}.{part.filename.split('.')[1]}' or part.filename))
+                    ext = Path(part.filename).suffix
+                    uploaded_name = f'{filename}{ext}' if filename else part.filename
+                    part.save_as(MEDIA_PATH / uploaded_name)
+                    return uploaded_name
+
                 else:
                     logger.info(
                         f'{part.name}: Invalid file ({part.size} bytes)')
@@ -87,13 +88,10 @@ class BaseHandler(BaseHTTPRequestHandler):
 
             for part in parser.parts():
                 part.close()
-        else:
-            self.response('Request w/out form', 400)
-            return
-        self.response('File upload successfuly', 201)
+        return None
 
-    def upload_file(self, filename: str = None) -> None:
+    def upload_file(self, filename: str = None) -> str | None:
         content_type, options = parse_options_header(
             self.headers['Content-Type'])
         content_length = int(self.headers['Content-Length'])
-        self.parse_multipart(content_type, options, content_length, filename)
+        return self.parse_multipart(content_type, options, content_length, filename)

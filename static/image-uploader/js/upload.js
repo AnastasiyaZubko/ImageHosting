@@ -1,15 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' || event.key === 'F5') {
-            event.preventDefault();
-
-            sessionStorage.removeItem('pageWasVisited');
-            window.location.href = '../index';
-        }
-    });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async() => {
     const fileUpload = document.getElementById('file-upload');
     const imagesButton = document.getElementById('images-tab-btn');
     const dropzone = document.querySelector('.upload__dropzone');
@@ -19,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateTabStyles = () => {
         const uploadTab = document.getElementById('upload-tab-btn');
         const imagesTab = document.getElementById('images-tab-btn');
-        const storedFiles = JSON.parse(localStorage.getItem('uploadedImages')) || [];
 
         const isImagesPage = window.location.pathname.includes('images');
 
@@ -33,40 +21,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const handleAndStoreFiles = (files) => {
+    const handleAndStoreFiles = async (files) => {
         if (!files || files.length === 0) {
             return;
         }
-        const storedFiles = JSON.parse(localStorage.getItem('uploadedImages')) || [];
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
         const MAX_SIZE_MB = 5;
         const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-        let filesAdded = false;
-        let lastFileName = '';
 
         for (const file of files) {
             if (!allowedTypes.includes(file.type) || file.size > MAX_SIZE_BYTES) {
+                console.log('Invalid file type or size');
                 continue;
             }
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const fileData = { name: file.name, url: event.target.result };
-                storedFiles.push(fileData);
-                localStorage.setItem('uploadedImages', JSON.stringify(storedFiles));
-                updateTabStyles();
-            };
-            reader.readAsDataURL(file);
-            filesAdded = true;
-            lastFileName = file.name;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/upload',{
+                method: 'POST',
+                body: formData,
+            })
+            if (!response.status === 201){
+                console.error('Error uploading file:', response);
+                continue;
+            }
+            const data = await response.json();
+            currentUploadInput.value = `http://localhost:8000/api/images/${data.filename}`;
+            alert("Files selected successfully! Go to the 'Images' tab to view them.");
+
         }
 
-        if (filesAdded) {
-            if (currentUploadInput) {
-                currentUploadInput.value = `https://sharefile.xyz/${lastFileName}`;
-            }
-            alert("Files selected successfully! Go to the 'Images' tab to view them.");
-        }
     };
 
     if (copyButton && currentUploadInput) {

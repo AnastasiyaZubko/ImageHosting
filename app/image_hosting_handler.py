@@ -1,10 +1,7 @@
 import logging
 import uuid
-from enum import unique
-
 from app.settings import MEDIA_PATH
 from base_handler import BaseHandler
-import multipart
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +12,6 @@ class ImageHostingHandler(BaseHandler):
         logger.info(f'GET {self.client_address[0]}:{self.path}')
 
         if self.path.startswith('/api'):
-            # images list /api/images/
-            # image /api/images/<id>
             if self.path == '/api/images':
                 self.get_images()
             elif self.path.startswith('/api/images/'):
@@ -39,7 +34,11 @@ class ImageHostingHandler(BaseHandler):
         logger.info(f'POST {self.client_address[0]}:{self.path}')
         if self.path == '/api/upload':
             unique_id = uuid.uuid4()
-            self.upload_file(str(unique_id)[:8])
+            filename = self.upload_file(str(unique_id)[:8])
+            self.json_response({
+                'message':'File uploaded successfully',
+                'filename': filename
+            }, 201)
         else:
             self.html_response('Not Found', 404)
 

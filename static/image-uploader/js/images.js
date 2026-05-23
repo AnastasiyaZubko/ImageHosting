@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     document.addEventListener('keydown', function (event) {
         if (event.key === 'F5' || event.key === 'Escape') {
             event.preventDefault();
@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateTabStyles = () => {
         const uploadTab = document.getElementById('upload-tab-btn');
         const imagesTab = document.getElementById('images-tab-btn');
-        const storedFiles = JSON.parse(localStorage.getItem('uploadedImages')) || [];
 
         const isImagesPage = window.location.pathname.includes('images');
 
@@ -25,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const displayFiles = () => {
-        const storedFiles = JSON.parse(localStorage.getItem('uploadedImages')) || [];
+    const displayFiles = async () => {
+        const storedFiles = await fetch ('/api/images').then(res => res.json()).then(data => data.images);
         fileListWrapper.innerHTML = '';
 
         if (storedFiles.length === 0) {
@@ -37,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const header = document.createElement('div');
             header.className = 'file-list-header';
             header.innerHTML = `
+                <div class="file-col file-col-image">Image</div>
                 <div class="file-col file-col-name">Name</div>
                 <div class="file-col file-col-url">Url</div>
                 <div class="file-col file-col-delete">Delete</div>
@@ -46,17 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const list = document.createElement('div');
             list.id = 'file-list';
 
-            storedFiles.forEach((fileData, index) => {
+            storedFiles.forEach((filename) => {
                 const fileItem = document.createElement('div');
                 fileItem.className = 'file-list-item';
                 fileItem.innerHTML = `
-                    <div class="file-col file-col-name">
-                        <span class="file-icon"><img src="../image-uploader/img/icon/Group.png" alt="file icon"></span>
-                        <span class="file-name">${fileData.name}</span>
+                    <div class="file-col file-col-image">
+                        <img src="/api/images/${filename}" alt="file icon" width='20%'>
                     </div>
-                    <div class="file-col file-col-url">https://sharefile.xyz/${fileData.name}</div>
+                    <div class="file-col file-col-name">
+                        <span class="file-name">${filename}</span>
+                    </div>
+                    <div class="file-col file-col-url"><a href='http://localhost:8000/api/images/${filename}' target='_blank'>http://localhost:8000/api/images/${filename}</a></div>
                     <div class="file-col file-col-delete">
-                        <button class="delete-btn" data-index="${index}"><img src="../image-uploader/img/icon/delete.png" alt="delete icon"></button>
+                        <button data-filename='${filename}' class="delete-btn"><img src="../image-uploader/img/icon/delete.png" alt="delete icon"></button>
                     </div>
                 `;
                 list.appendChild(fileItem);
@@ -70,13 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTabStyles();
     };
 
-    const addDeleteListeners = () => {
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const indexToDelete = parseInt(event.currentTarget.dataset.index);
-                let storedFiles = JSON.parse(localStorage.getItem('uploadedImages')) || [];
-                storedFiles.splice(indexToDelete, 1);
-                localStorage.setItem('uploadedImages', JSON.stringify(storedFiles));
+    const addDeleteListeners = async () => {
+        document.querySelectorAll('.delete-btn').forEach(async (button) => {
+            button.addEventListener('click', async (event) => {
+                const filename = event.currentTarget.dataset.filename;
+                await fetch(`/api/images/${filename}`,{ method: 'DELETE'})
+                    .then(() => { displayFiles(); })
+                    .catch(() => {console.log('File deletion failed')})
                 displayFiles();
             });
         });
