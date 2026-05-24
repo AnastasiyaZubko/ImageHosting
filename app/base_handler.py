@@ -58,8 +58,8 @@ class BaseHandler(BaseHTTPRequestHandler):
     def send_media_file(self, filename: str) -> None:
         self.response(self.load_file(filename, MEDIA_PATH), content_type='image/png')
 
-    # @staticmethod
-    def validate_file(self,file: MultipartPart) -> bool:
+    @staticmethod
+    def validate_file(file: MultipartPart) -> bool:
         ext = Path(file.filename).suffix.lstrip('.').lower()
         if not ext:
             return False
@@ -73,7 +73,6 @@ class BaseHandler(BaseHTTPRequestHandler):
             with Image.open(temp_file) as img:
                 img.verify()
         except (IOError,SyntaxError):
-            self.response('Invalid file type', status_code=400)
             return False
         return True
 
