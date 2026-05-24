@@ -25,8 +25,8 @@ class ImageHostingHandler(BaseHandler):
         elif self.path == '/images':
             self.template_response('images.html')
 
-        elif any((self.path.endswith(ext) for ext in ['.css', '.js', '.png'])):
-            self.send_static_file(self.path)
+        # elif any((self.path.endswith(ext) for ext in ['.css', '.js', '.png'])):
+        #     self.send_static_file(self.path)
         else:
             self.html_response('Not Found', 404)
 
