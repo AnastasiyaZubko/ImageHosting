@@ -1,4 +1,5 @@
 from __future__ import annotations
+from PIL import Image
 import json
 import logging
 from http.server import BaseHTTPRequestHandler
@@ -58,14 +59,23 @@ class BaseHandler(BaseHTTPRequestHandler):
         self.response(self.load_file(filename, MEDIA_PATH), content_type='image/png')
 
     def validate_file(self, file: MultipartPart) -> bool:
-        name, ext = file.filename.split('.')
+        ext = Path(file.filename).suffix.lstrip('.').lower()
+        if not ext:
+            self.response(f'Invalid file type. Allowed types: {IMAGE_EXTENSIONS}', status_code=400)
+            return False
         if ext.lower() not in IMAGE_EXTENSIONS:
             self.response(f'Invalid file type. Allowed types: {IMAGE_EXTENSIONS}', status_code=400)
             return False
         if file.size > MAX_FILE_SIZE:
             self.response('File size too large', status_code=400)
             return False
-        # TODO: validate file with PIL
+        temp_file = f'temp.{ext}'
+        file.save_as(temp_file)
+        try:
+            with Image.open(temp_file) as img:
+                img.verify()
+        except (IOError,SyntaxError):
+            return False
         return True
 
     def parse_multipart(self, content_type: str, options: dict,
