@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from PIL import Image
 import json
 import logging
 from http.server import BaseHTTPRequestHandler
@@ -61,12 +61,22 @@ class BaseHandler(BaseHTTPRequestHandler):
         self.response(self.load_file(filename, MEDIA_PATH), content_type='image/png')
 
     def validate_file(self, file: MultipartPart) -> bool:
-        name, ext = file.filename.split('.')
+        ext = Path(file.filename).suffix.lstrip('.').lower()
+        if not ext:
+            self.response(f'Invalid file type. Allowed types: {IMAGE_EXTENSIONS}', status_code=400)
+            return False
         if ext.lower() not in IMAGE_EXTENSIONS:
             self.response(f'Invalid file type. Allowed types: {IMAGE_EXTENSIONS}', status_code=400)
             return False
         if file.size > MAX_FILE_SIZE:
             self.response('File size too large', status_code=400)
+            return False
+        temp_file = f'temp.{ext}'
+        file.save_as(temp_file)
+        try:
+            with Image.open(temp_file) as img:
+                img.verify()
+        except (IOError,SyntaxError):
             return False
         return True
 
@@ -79,7 +89,9 @@ class BaseHandler(BaseHTTPRequestHandler):
             for part in parser:
                 if self.validate_file(part):
                     logger.info(f'{part.name}: File upload ({part.size} bytes)')
-                    part.save_as(MEDIA_PATH / (f'{filename}.{part.filename.split('.')[1]}' or part.filename))
+                    ext = Path(part.filename).suffix
+                    uploaded_name = f'{filename}.{ext}' if filename else part.filename
+                    part.save_as(MEDIA_PATH / uploaded_name )
                 else:
                     logger.info(
                         f'{part.name}: Invalid file ({part.size} bytes)')
