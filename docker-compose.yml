@@ -7,9 +7,9 @@ services:
     ports:
         - "8000:8000"
     volumes:
-        - images:/app/images
-        - logs:/app/logs
-        - .:/app
+        - ./images:/app/images
+        - ./logs:/app/logs
+
     env_file: .env
     restart: always
 
@@ -20,12 +20,9 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - images:/data/images
+      - ./images:/data/images
       - ./static:/data/static
-      - logs:/var/log/nginx
+      - ./logs:/var/log/nginx
 
-volumes:
-  images:
-  logs:
 
 

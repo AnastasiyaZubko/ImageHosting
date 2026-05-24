@@ -35,10 +35,15 @@ class ImageHostingHandler(BaseHandler):
         if self.path == '/api/upload':
             unique_id = uuid.uuid4()
             filename = self.upload_file(str(unique_id)[:8])
-            self.json_response({
-                'message':'File uploaded successfully',
-                'filename': filename
-            }, 201)
+            if filename:
+                self.json_response({
+                    'message':'File uploaded successfully',
+                    'filename': filename
+                }, 201)
+            else:
+                self.json_response({
+                    'message':'Invalid file type or size',
+                }, 400)
         else:
             self.html_response('Not Found', 404)
 
