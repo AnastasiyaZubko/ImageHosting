@@ -59,7 +59,7 @@ class BaseHandler(BaseHTTPRequestHandler):
         self.response(self.load_file(filename, MEDIA_PATH), content_type='image/png')
 
     @staticmethod
-    def validate_file(self, file: MultipartPart) -> bool:
+    def validate_file(file: MultipartPart) -> bool:
         ext = Path(file.filename).suffix.lstrip('.').lower()
         if not ext:
             return False
