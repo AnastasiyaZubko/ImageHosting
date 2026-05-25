@@ -1,10 +1,15 @@
 from __future__ import annotations
+
+from uuid import uuid4
+
 from PIL import Image
 import json
 import logging
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from multipart import MultipartPart, MultipartParser, parse_options_header
+
+from app.db_manager import DBManager
 from app.settings import STATIC_DIR, IMAGE_EXTENSIONS, MAX_FILE_SIZE, MEDIA_PATH, STATIC_PATH
 
 logger = logging.getLogger(__name__)
@@ -77,18 +82,25 @@ class BaseHandler(BaseHTTPRequestHandler):
         return True
 
     def parse_multipart(self, content_type: str, options: dict,
-                        content_length: int, filename: str = None) -> str | None:
+                        content_length: int) -> dict | None:
         if content_type == 'multipart/form-data' and 'boundary' in options:
             parser = MultipartParser(self.rfile,
                                      boundary=options['boundary'],
                                      content_length=content_length)
             for part in parser:
                 if self.validate_file(part):
-                    logger.info(f'{part.name}: File upload ({part.size} bytes)')
+                    unique_name = str(uuid4())[:8]
+                    logger.info(f'{part.filename}: File upload ({part.size} bytes)')
                     ext = Path(part.filename).suffix
-                    uploaded_name = f'{filename}{ext}' if filename else part.filename
+                    uploaded_name = f'{unique_name}{ext}'
                     part.save_as(MEDIA_PATH / uploaded_name)
-                    return uploaded_name
+                    image_data={
+                        'filename': unique_name,
+                        'original_name': part.filename,
+                        'size': part.size // 1024,
+                        'file_type': ext.lstrip('.'),
+                    }
+                    return image_data
 
                 else:
                     logger.info(
@@ -99,8 +111,8 @@ class BaseHandler(BaseHTTPRequestHandler):
                 part.close()
         return None
 
-    def upload_file(self, filename: str = None) -> str | None:
+    def upload_file(self) -> dict | None:
         content_type, options = parse_options_header(
             self.headers['Content-Type'])
         content_length = int(self.headers['Content-Length'])
-        return self.parse_multipart(content_type, options, content_length, filename)
+        return self.parse_multipart(content_type, options, content_length)
