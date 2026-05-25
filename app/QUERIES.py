@@ -23,6 +23,6 @@ SELECT * FROM images
 '''
 
 GET_IMAGES_NAMES = '''
-SELECT filename FROM images
+SELECT filename || '.' || file_type FROM images
 '''
 
