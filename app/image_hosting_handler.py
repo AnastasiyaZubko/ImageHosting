@@ -61,10 +61,11 @@ class ImageHostingHandler(BaseHandler):
 
     def do_DELETE(self):
         self.db: DBManager = DBManager()
-        logger.info(f'DELETE {self.client_address[0]}:{self.path}')
-        if self.path.startswith('/api/images'):
+        logger.info(f"DELETE {self.client_address[0]}: {self.path}")
+        if self.path.startswith('/api/images/'):
             name = self.path.split('/')[-1]
-            self.delete_image(name)
+            name, file_type = name.rsplit('.', 1)
+            self.delete_image(name, file_type)
 
     def get_images_names(self):
         # GET names from DataBase
@@ -73,20 +74,31 @@ class ImageHostingHandler(BaseHandler):
         )
 
     def get_images(self):
+        images = self.db.get_images()
+        res_images = []
+        for image in images:
+            res_images.append({
+                'id': image[0],
+                'filename': image[1],
+                'original_name': image[2],
+                'size': image[3],
+                'upload_time': image[4].strftime("%Y/%m/%d %H:%M:%S"),
+                'file_type': image[5],
+            })
         self.json_response({
-            'images': self.db.get_images()
+            'images': res_images
         })
 
-    def delete_image(self, name: str):
-
+    def delete_image(self, name: str, file_type: str):
         try:
-            self.db.delete_image(name)  # DELETE from DataBase
-            (MEDIA_PATH / name).unlink()
-            logger.info(f'Image {name} deleted successfully')
-            self.json_response({'message': 'Image deleted successfully'}, 204)
+            self.db.delete_image(name)
+            (MEDIA_PATH / (name + '.' + file_type)).unlink()
+            logger.info(f"Image {name} deleted successfully")
+            self.json_response({'message': 'Image deleted successfully'},
+                               status_code=204)
         except FileNotFoundError:
-            logger.info(f'File {name} not found (on delete)')
+            logger.info(f"File {name} not found (on delete)")
             self.json_response({'message': 'Image not found'}, 404)
-        except DatabaseError as e:
-            logger.info(f'{name} not found in database (on delete)')
+        except DatabaseError:
+            logger.info(f"{name} not found in database (on delete)")
             self.json_response({'message': 'Image not found'}, 404)

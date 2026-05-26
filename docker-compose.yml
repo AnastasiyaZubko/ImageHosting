@@ -31,6 +31,8 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./logs:/var/log/postgresql
+    command: ["postgres", "-c", "log_statement=all"]
 
 volumes:
   db_data:
