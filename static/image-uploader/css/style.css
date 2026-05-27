@@ -340,3 +340,25 @@ body {
     opacity: 0.7;
     /* Make the icon semi-transparent for user feedback */
 }
+
+
+/* Footer */
+.site-footer {
+    margin-top: 60px;
+    padding: 18px 0;
+    border-top: 1px solid #eef0f5;
+    background: transparent;
+}
+.site-footer__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    color: #8a96b1;
+    font-size: 18px;
+}
+
+}
