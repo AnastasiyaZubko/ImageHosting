@@ -71,12 +71,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="file-col file-col-image">Image</div>
                 <div class="file-col file-col-name">Name</div>
                 <div class="file-col file-col-url">Url</div>
+                <div class="file-col file-col-size">Size</div>
                 <div class="file-col file-col-delete">Delete</div>
             `;
             container.appendChild(header);
 
             const list = document.createElement('div');
             list.id = 'file-list';
+
+//            const formatFileSize = (bytes) => {
+//            if (!bytes || bytes === 0) return '0 Bytes';
+//            const k = 1024;
+//            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+//            const i = Math.floor(Math.log(bytes) / Math.log(k));
+//            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+//};
+
 
             storedFiles.forEach((image) => {
                 const imageUrl = `${window.location.origin}/images/${image.filename}.${image.file_type}`;
@@ -90,6 +100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="file-name">${image.original_name}</span>
                     </div>
                     <div class="file-col file-col-url"><a href="${imageUrl}" target="_blank">${imageUrl}</a></div>
+                    <div class="file-col file-col-size">
+                        <span class="file-size">${image.size} КБ</span>
+                    </div>
                     <div class="file-col file-col-delete">
                         <button data-filename="${image.filename}.${image.file_type}" class="delete-btn"><img src="/static/image-uploader/img/icon/delete.png" alt="delete icon"></button>
                     </div>

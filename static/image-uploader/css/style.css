@@ -262,18 +262,23 @@ body {
     align-items: center;
 }
 .file-col-image {
-    flex-basis: 30%;
+    flex-basis: 15%;
 }
 
-}
+
 .file-col-name {
-    flex-basis: 30%;
+    flex-basis: 25%;
 }
 
 .file-col-url {
-    flex-basis: 30%;
+    flex-basis: 40%;
     color: #555;
     font-size: 14px;
+}
+
+
+.file-col-size {
+    flex-basis: 10%;
 }
 
 .file-col-delete {
@@ -295,6 +300,16 @@ body {
 
 /* File name */
 .file-name {
+    color: #333;
+    font-weight: 500;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* File size */
+.file-size {
     color: #333;
     font-weight: 500;
     max-width: 200px;
