@@ -227,7 +227,7 @@ body {
 
 /* Container for the entire table */
 .file-list-container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
     border-radius: 8px;
@@ -238,7 +238,8 @@ body {
 .file-list-header,
 .file-list-item {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 12px;
     align-items: center;
     padding: 10px 0;
     border-bottom: 1px solid #eef0f5;
@@ -260,29 +261,42 @@ body {
 .file-col {
     display: flex;
     align-items: center;
+    min-width: 0;
 }
 .file-col-image {
-    flex-basis: 15%;
+    flex: 0 0 80px;
 }
 
 
 .file-col-name {
-    flex-basis: 25%;
+    flex: 0 0 180px;
 }
 
 .file-col-url {
-    flex-basis: 40%;
+    flex: 1 1 auto;
     color: #555;
     font-size: 14px;
 }
 
+.file-col-url a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    max-width: 100%;
+}
+
 
 .file-col-size {
-    flex-basis: 10%;
+    flex: 0 0 90px;
+}
+
+.file-col-date {
+    flex: 0 0 200px;
 }
 
 .file-col-delete {
-    flex-basis: 10%;
+    flex: 0 0 80px;
     justify-content: center;
 }
 
@@ -308,8 +322,27 @@ body {
     text-overflow: ellipsis;
 }
 
+/* File name */
+.file-url {
+    color: #333;
+    font-weight: 500;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 /* File size */
 .file-size {
+    color: #333;
+    font-weight: 500;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* File date */
+.file-date {
     color: #333;
     font-weight: 500;
     max-width: 200px;

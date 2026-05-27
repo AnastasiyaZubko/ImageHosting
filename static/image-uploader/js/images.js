@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="file-col file-col-name">Name</div>
                 <div class="file-col file-col-url">Url</div>
                 <div class="file-col file-col-size">Size</div>
+                <div class="file-col file-col-size">Date</div>
                 <div class="file-col file-col-delete">Delete</div>
             `;
             container.appendChild(header);
@@ -94,6 +95,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="file-col file-col-url"><a href="${imageUrl}" target="_blank">${imageUrl}</a></div>
                     <div class="file-col file-col-size">
                         <span class="file-size">${image.size} КБ</span>
+                    </div>
+                    <div class="file-col file-col-date">
+                        <span class="file-date">${image.upload_time}</span>
                     </div>
                     <div class="file-col file-col-delete">
                         <button data-filename="${image.filename}.${image.file_type}" class="delete-btn"><img src="/static/image-uploader/img/icon/delete.png" alt="delete icon"></button>
