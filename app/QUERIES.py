@@ -1,3 +1,5 @@
+from app.settings import IMAGE_LIMIT
+
 CREATE_TABLE = '''CREATE TABLE IF NOT EXISTS images (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Уникальный идентификатор записи
     filename TEXT NOT NULL,              -- Уникальное имя файла (сгенерированное)
@@ -18,11 +20,16 @@ DELETE FROM images
 WHERE filename = %s
 '''
 
-GET_ALL_IMAGES = '''
+GET_ALL_IMAGES = f'''
 SELECT * FROM images
+OFFSET $s
+LIMIT {IMAGE_LIMIT}
 '''
 
 GET_IMAGES_NAMES = '''
 SELECT filename || '.' || file_type FROM images
 '''
 
+GET_IMAGES_COUNT = """
+SELECT COUNT(*) FROM images
+"""

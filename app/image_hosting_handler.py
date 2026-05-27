@@ -1,10 +1,12 @@
+from urllib.parse import urlsplit
+
 import logging
 
 from psycopg import DatabaseError
 
+from app.base_handler import BaseHandler
+from app.db_manager import DBManager
 from app.settings import MEDIA_PATH
-from .base_handler import BaseHandler
-from .db_manager import DBManager
 
 logger = logging.getLogger(__name__)
 
@@ -15,42 +17,37 @@ class ImageHostingHandler(BaseHandler):
         self.db: DBManager = DBManager()
         super().__init__(*args, **kwargs)
 
-
     def do_GET(self):
+        logger.info(f"GET {self.client_address[0]}: {self.path}")
 
-        logger.info(f'GET {self.client_address[0]}:{self.path}')
-
-        api_handlers = {
-            '/api/images': self.get_images_names,
-            '/api/images-data/': self.get_images,
-        }
-        templates = {
-            '/': 'index.html',
-            '/upload': 'upload.html',
-            '/images': 'images.html'
-        }
-
-        if self.path in templates:
-            self.template_response(templates[self.path])
-        elif self.path in api_handlers:
-            api_handlers[self.path]()
+        if self.path == '/':
+            self.template_response('index.html')
+        elif self.path == '/upload':
+            self.template_response('upload.html')
+        elif self.path.startswith('/images'):
+            self.template_response('images.html')
+        elif self.path.startswith('/api/images-data'):
+            path = urlsplit(self.path)
+            page = int(path.query.split('=')[1]) if path.query else 1
+            self.get_images(page)
+        elif self.path.startswith('/api/images'):
+            self.get_images_names()
         else:
             self.html_response('Not Found', 404)
 
     def do_POST(self):
-
-        logger.info(f'POST {self.client_address[0]}:{self.path}')
+        logger.info(f"POST {self.client_address[0]}: {self.path}")
         if self.path == '/api/upload':
             image_dict = self.upload_file()
             if image_dict:
-                self.db.add_image(image_dict)  # SAVE to DataBase
+                self.db.add_image(image_dict)
                 self.json_response({
                     'message': 'File uploaded successfully',
-                    'image': image_dict,
+                    'image': image_dict
                 }, 201)
             else:
                 self.json_response({
-                    'message': 'Invalid file type or size',
+                    'message': 'Invalid file type or file size'
                 }, 400)
         else:
             self.html_response('Not Found', 404)
@@ -63,26 +60,27 @@ class ImageHostingHandler(BaseHandler):
             name, file_type = name.rsplit('.', 1)
             self.delete_image(name, file_type)
 
-    def get_images_names(self):
-        # GET names from DataBase
+    def get_images_names(self, *args):
         self.json_response({
             'images': self.db.get_images_names()}
         )
 
-    def get_images(self):
-        images = self.db.get_images()
-        res_images = []
-        for image in images:
-            res_images.append({
-                'id': image[0],
-                'filename': image[1],
-                'original_name': image[2],
-                'size': image[3],
-                'upload_time': image[4].strftime("%Y/%m/%d %H:%M:%S"),
-                'file_type': image[5],
-            })
+    def get_images(self, page: int):
+        images = self.db.get_images(page)
+        has_next = self.db.has_next(page)
+        res_images = [
+            {
+                'id': i[0],
+                'filename': i[1],
+                'original_name': i[2],
+                'size': i[3],
+                'upload_time': i[4].strftime('%Y-%m-%d %H:%M:%S'),
+                'file_type': i[5]
+            }
+            for i in images]
         self.json_response({
-            'images': res_images
+            'images': res_images,
+            'has_next': has_next
         })
 
     def delete_image(self, name: str, file_type: str):

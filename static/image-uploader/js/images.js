@@ -1,10 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'F5' || event.key === 'Escape') {
-            event.preventDefault();
-            window.location.href = '/upload';
-        }
-    });
+
     const fileListWrapper = document.getElementById('file-list-wrapper');
     const uploadRedirectButton = document.getElementById('upload-tab-btn');
 
@@ -27,11 +22,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     const displayFiles = async () => {
-        const storedFiles = await fetch('/api/images-data/').then(res => res.json()).then(data => data.images);
-        fileListWrapper.innerHTML = '';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let page =  urlParams.get('page');
+        if (page == null) {page = 1};
+        if (Number(page) < 1) { window.location.href = `/images?page=1`; return;};
+        const response = await fetch(`/api/images-data/?page=${page}`, { params: { page } }).then(res => res.json());
+        const storedFiles = response.images;
+
+        const prevButton = document.getElementById('prev-page-btn');
+        const nextButton = document.getElementById('next-page-btn');
+
+        prevButton.href = `/images?page=${Number(page) - 1}`;
+        nextButton.href = `/images?page=${Number(page) + 1}`;
+
+            if (Number(page) === 1) {
+                prevButton.classList.add('disabled');
+            } else {
+                prevButton.classList.remove('disabled');
+            }
+            if (response.has_next ) {
+                nextButton.classList.remove('disabled');
+            } else {
+                nextButton.classList.add('disabled');
+            }
+
+        const currentPage = document.getElementById('current-page');
+        currentPage.textContent = page;
+
+        // fileListWrapper.innerHTML = '';
 
         if (storedFiles.length === 0) {
+            if (Number(page) > 1) {
+                window.location.href = `/images?page=${Number(page) - 1}`;
+            }
             fileListWrapper.innerHTML = '<p class="upload__promt" style="text-align: center; margin-top: 50px;">No images uploaded yet.</p>';
+            const paginationWrapper = document.getElementById('pagination-wrapper');
+            paginationWrapper.style.display = 'none';
+
         } else {
             const container = document.createElement('div');
             container.className = 'file-list-container';
