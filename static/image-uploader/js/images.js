@@ -5,15 +5,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const updateTabStyles = () => {
         const uploadTab = document.getElementById('upload-tab-btn');
+        const galleryTab = document.getElementById('gallery-tab-btn');
         const imagesTab = document.getElementById('images-tab-btn');
-
         const isImagesPage = window.location.pathname.includes('images');
-
+        const isGalleryPage = window.location.pathname.includes('gallery');
         uploadTab.classList.remove('upload__tab--active');
         imagesTab.classList.remove('upload__tab--active');
-
+        if (galleryTab) galleryTab.classList.remove('upload__tab--active');
         if (isImagesPage) {
             imagesTab.classList.add('upload__tab--active');
+        } else if (isGalleryPage) {
+            if (galleryTab) galleryTab.classList.add('upload__tab--active');
         } else {
             uploadTab.classList.add('upload__tab--active');
         }
@@ -117,6 +119,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (uploadRedirectButton) {
         uploadRedirectButton.addEventListener('click', () => {
             window.location.href = '/upload';
+        });
+    }
+
+    const galleryRedirectButton = document.getElementById('gallery-tab-btn');
+    if (galleryRedirectButton) {
+        galleryRedirectButton.addEventListener('click', () => {
+            window.location.href = '/gallery';
         });
     }
 

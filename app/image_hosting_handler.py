@@ -32,6 +32,8 @@ class ImageHostingHandler(BaseHandler):
             self.get_images(page)
         elif self.path.startswith('/api/images'):
             self.get_images_names()
+        elif self.path.startswith('/gallery'):
+            self.template_response('gallery.html')
         else:
             self.html_response('Not Found', 404)
 

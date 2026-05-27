@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async() => {
     const fileUpload = document.getElementById('file-upload');
     const imagesButton = document.getElementById('images-tab-btn');
+    const galleryButton = document.getElementById('gallery-tab-btn');
     const dropzone = document.querySelector('.upload__dropzone');
     const currentUploadInput = document.querySelector('.upload__input');
     const copyButton = document.querySelector('.upload__copy');
@@ -74,6 +75,11 @@ document.addEventListener('DOMContentLoaded', async() => {
     if (imagesButton) {
         imagesButton.addEventListener('click', () => {
             window.location.href = '/images';
+        });
+    }
+    if (galleryButton) {
+        galleryButton.addEventListener('click', () => {
+            window.location.href = '/gallery?page=1';
         });
     }
 
