@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentPage = document.getElementById('current-page');
         currentPage.textContent = page;
 
-        // fileListWrapper.innerHTML = '';
+        fileListWrapper.innerHTML = '';
 
         if (storedFiles.length === 0) {
             if (Number(page) > 1) {
@@ -78,14 +78,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const list = document.createElement('div');
             list.id = 'file-list';
-
-//            const formatFileSize = (bytes) => {
-//            if (!bytes || bytes === 0) return '0 Bytes';
-//            const k = 1024;
-//            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-//            const i = Math.floor(Math.log(bytes) / Math.log(k));
-//            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-//};
 
 
             storedFiles.forEach((image) => {
