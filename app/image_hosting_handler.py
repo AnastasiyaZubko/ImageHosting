@@ -67,6 +67,7 @@ class ImageHostingHandler(BaseHandler):
 
     def get_images(self, page: int):
         images = self.db.get_images(page)
+        # images = images or []
         has_next = self.db.has_next(page)
         res_images = [
             {
@@ -77,7 +78,8 @@ class ImageHostingHandler(BaseHandler):
                 'upload_time': i[4].strftime('%Y-%m-%d %H:%M:%S'),
                 'file_type': i[5]
             }
-            for i in images]
+            for i in images
+        ]
         self.json_response({
             'images': res_images,
             'has_next': has_next

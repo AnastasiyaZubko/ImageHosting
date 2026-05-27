@@ -22,7 +22,7 @@ WHERE filename = %s
 
 GET_ALL_IMAGES = f'''
 SELECT * FROM images
-OFFSET $s
+OFFSET %s
 LIMIT {IMAGE_LIMIT}
 '''
 
